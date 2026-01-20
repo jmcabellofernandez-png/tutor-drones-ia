@@ -7,7 +7,7 @@ st.title("🛸 Mi Tutor de Drones")
 try:
     API_KEY = st.secrets["AIzaSyA8mzDtkfR72AtTfKjT3kkTBBajeSKp1e8"]
 except:
-    st.error("⚠️ Falta la llave en los Secrets de Streamlit.")
+    st.error("⚠️ AIzaSyA8mzDtkfR72AtTfKjT3kkTBBajeSKp1e8")
     st.stop()
 
 pregunta = st.text_input("Haz tu consulta:")
