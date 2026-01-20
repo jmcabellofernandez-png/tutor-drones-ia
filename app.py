@@ -4,34 +4,38 @@ import requests
 st.set_page_config(page_title="Tutor Drones", page_icon="🛸")
 st.title("🛸 Mi Tutor de Drones")
 
-# Tu clave que ya funciona
 API_KEY = "AIzaSyAMnsCYE5JvPcWQ0up-goXmALEnbWr2jfQ"
 
-pregunta = st.text_input("Escribe tu duda sobre el curso de drones:")
+pregunta = st.text_input("Haz tu pregunta sobre drones:")
 
 if st.button("Consultar"):
     if pregunta:
-        # Probamos con la URL más directa y simplificada posible
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
-        
-        payload = {
-            "contents": [{
-                "parts": [{"text": f"Eres un experto en drones en España. Responde brevemente: {pregunta}"}]
-            }]
-        }
-        
-        with st.spinner("Conectando con Google..."):
+        with st.spinner("Buscando el modelo adecuado en tu cuenta..."):
             try:
-                res = requests.post(url, json=payload)
-                if res.status_code == 200:
-                    respuesta = res.json()['candidates'][0]['content']['parts'][0]['text']
-                    st.markdown("---")
-                    st.info(respuesta)
+                # 1. PASO MAESTRO: Preguntamos qué modelos tienes tú
+                list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
+                response = requests.get(list_url).json()
+                
+                # Buscamos en tu lista el primer modelo que permita generar contenido
+                model_name = None
+                for m in response.get('models', []):
+                    if 'generateContent' in m.get('supportedGenerationMethods', []):
+                        model_name = m['name']
+                        break
+                
+                if model_name:
+                    # 2. Usamos el modelo que Google nos ha dicho que SÍ tienes
+                    url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent?key={API_KEY}"
+                    payload = {"contents": [{"parts": [{"text": f"Eres experto en drones en España. Responde: {pregunta}"}]}]}
+                    
+                    res = requests.post(url, json=payload)
+                    if res.status_code == 200:
+                        st.success(f"Conectado vía {model_name}")
+                        st.write(res.json()['candidates'][0]['content']['parts'][0]['text'])
+                    else:
+                        st.error(f"Error al responder: {res.status_code}")
                 else:
-                    # Si falla, te mostraré el mensaje real de Google para saber qué hacer
-                    st.error(f"Google dice: {res.status_code}")
-                    st.write(res.text)
+                    st.error("No se encontró ningún modelo activo en esta API KEY.")
+                    
             except Exception as e:
-                st.error(f"Error técnico: {e}")
-    else:
-        st.warning("Escribe una pregunta.")
+                st.error(f"Error de conexión: {e}")
