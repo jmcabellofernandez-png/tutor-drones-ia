@@ -10,19 +10,24 @@ pregunta = st.text_input("Escribe tu duda del curso aquí:")
 
 if st.button("Consultar"):
     if pregunta:
-        # Estas líneas de abajo TIENEN que tener espacios al principio (sangría)
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={API_KEY}"
+        # Fíjate que estas líneas tienen 8 espacios al principio
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
         headers = {'Content-Type': 'application/json'}
         payload = {
             "contents": [{
-                "parts": [{"text": f"Eres un experto en drones en España. Responde a: {pregunta}"}]
+                "parts": [{"text": f"Eres un experto en normativa de drones en España. Responde a: {pregunta}"}]
             }]
         }
         
-        with st.spinner("Conectando..."):
-            res = requests.post(url, json=payload, headers=headers)
-            if res.status_code == 200:
-                respuesta = res.json()['candidates'][0]['content']['parts'][0]['text']
-                st.markdown(respuesta)
-            else:
-                st.error(f"Error: {res.status_code}")
+        with st.spinner("Conectando con la IA..."):
+            try:
+                res = requests.post(url, json=payload, headers=headers)
+                if res.status_code == 200:
+                    respuesta = res.json()['candidates'][0]['content']['parts'][0]['text']
+                    st.markdown(respuesta)
+                else:
+                    st.error(f"Error {res.status_code}. Prueba a preguntar de nuevo.")
+            except Exception as e:
+                st.error("Error de conexión.")
+    else:
+        st.warning("Por favor, escribe una pregunta.")
