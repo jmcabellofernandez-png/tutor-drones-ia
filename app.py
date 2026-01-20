@@ -1,31 +1,37 @@
 import streamlit as st
 import requests
 
+# Configuración básica
 st.set_page_config(page_title="Tutor Drones", page_icon="🛸")
 st.title("🛸 Mi Tutor de Drones")
+st.write("Pregúntame lo que quieras sobre normativa o vuelo de drones.")
 
-# Tu llave actual
-API_KEY = "AIzaSyAMnsCYE5JvPcWQ0up-goXmALEnbWr2jfQ"
+# TU LLAVE YA INSTALADA
+API_KEY = "AIzaSyADAU-W1wXg8YH9dS_QiNMQd0CzQqTfCA0"
 
-pregunta = st.text_input("Haz tu pregunta sobre drones:")
+pregunta = st.text_input("Escribe tu duda:")
 
-if st.button("Consultar"):
+if st.button("Consultar al experto"):
     if pregunta:
-        with st.spinner("Solicitando acceso a Google..."):
-            # Usamos v1 (estable) y gemini-1.0-pro (el que menos falla con el 403)
-            url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key={API_KEY}"
-            
-            headers = {'Content-Type': 'application/json'}
-            payload = {
-                "contents": [{"parts": [{"text": f"Eres experto en drones. Responde: {pregunta}"}]}]
-            }
-            
+        # Dirección de Google Gemini
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        
+        payload = {
+            "contents": [{
+                "parts": [{"text": f"Eres un experto en drones en España. Responde de forma clara y amable a: {pregunta}"}]
+            }]
+        }
+        
+        with st.spinner("Pensando..."):
             try:
-                res = requests.post(url, json=payload, headers=headers)
+                res = requests.post(url, json=payload)
                 if res.status_code == 200:
-                    st.write(res.json()['candidates'][0]['content']['parts'][0]['text'])
+                    respuesta = res.json()['candidates'][0]['content']['parts'][0]['text']
+                    st.markdown("---")
+                    st.write(respuesta)
                 else:
-                    st.error(f"Error {res.status_code}. Google no permite el acceso con esta llave.")
-                    st.info("Esto significa que necesitamos generar una llave nueva en Google AI Studio.")
-            except Exception as e:
-                st.error(f"Error: {e}")
+                    st.error(f"Error de Google: {res.status_code}. Prueba de nuevo en un momento.")
+            except:
+                st.error("Hubo un problema de conexión.")
+    else:
+        st.warning("Escribe una pregunta primero.")
