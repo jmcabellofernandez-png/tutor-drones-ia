@@ -3,7 +3,7 @@ import requests
 
 st.title("🛸 Mi Tutor de Drones")
 
-API_KEY = "AIzaSyADAU-W1wXg8YH9dS_QiNMQd0CzQqTfCA0"
+API_KEY = AIzaSyBJYYLZMgBqtOFFszCRL6oxwowjo1FJ5w0
 pregunta = st.text_input("Duda sobre drones:")
 
 if st.button("Consultar"):
